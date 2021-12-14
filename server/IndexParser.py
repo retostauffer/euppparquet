@@ -180,16 +180,67 @@ class IndexParser:
         zip.close()                # Close the file after opening it
         del zip
 
-        # Write parquet file
-        n_data = data.shape[0]
-        if verbose: print(f"    Writing {n_data} entries into parquet '{file_info['type']}'.")
-        try:
-            data.to_parquet(file_info["type"], partition_cols = partition_cols)
-        except Exception as e:
-            raise Exception(f"Whoops, problem writing parquet data; {e}")
+        # Find all unique paths for the parquet check
+        paths = [str(x) for x in data._path.unique()]
+        check = self._check_records_by_filename_(f"{file_info['type']}.parquet", paths)
+        if not check:
+            # Write parquet file
+            n_data = data.shape[0]
+            if verbose: print(f"    Writing {n_data} entries into parquet '{file_info['type']}'.")
+            try:
+                data.to_parquet(f"{file_info['type']}.parquet", partition_cols = partition_cols)
+            except Exception as e:
+                raise Exception(f"Whoops, problem writing parquet data; {e}")
+        else:
+            if verbose: print(f"    File already processed; don't add it to the parquet file again.")
 
         # Return the object for testing
         return data
+
+
+    def _check_records_by_filename_(self, dataset, paths):
+        """_check_records_by_filename_(dataset, paths):
+
+        Used internally to check if we have already processed this file (by
+        path) to avoid adding the same information twice which will create
+        duplicated entries in the parquet file.
+
+        Parameter
+        =========
+        dataset : str
+            Name of the parquet dataset to be checked.
+        paths : str or list of str
+            Name of the paths being processed; will check if this file
+            already exists in the parquet dataset.
+
+        Return
+        ======
+        Returns None if no entry is found, else a positive integer.
+        """
+
+        from os.path import isdir
+        import pyarrow.parquet as parquet
+        import pandas as pd
+
+        # Only if parquet data set exists
+        if isdir(dataset):
+            if isinstance(paths, str): paths = [paths]
+            if not isinstance(paths, list):
+                raise TypeError("Wrong input on 'paths', must be single str or list.")
+            for p in paths:
+                if not isinstance(p, str):
+                    raise TypeError("Wrong input on 'paths', all list entries must be string.")
+
+            # Prepare filter, fetch data, and return either None if not found
+            # or a positive integer (number of entries found).
+            filters = [("_path", "=", p) for p in paths]
+            res = pd.read_parquet(dataset, engine = "pyarrow", filters = filters, columns = ["_path"])
+
+            return None if res.shape[0] == 0 else res.shape[0]
+
+        # Dataset does not yet exist
+        return None
+
 
 
 
