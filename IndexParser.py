@@ -12,6 +12,10 @@ import datetime as dt
 class IndexParser:
 
     PARQUET_PARTITIONING_ANALYSIS = ["year", "month", "day"]
+    #PARQUET_PARTITIONING_FORECAST = ["version", "year", "month", "day"]
+    PARQUET_PARTITIONING_FORECAST = ["version", "product", "year", "month", "day"]
+    #PARQUET_PARTITIONING_FORECAST = ["year", "month", "day", "step"]
+    #PARQUET_PARTITIONING_FORECAST = ["year", "month", "day", "param"]
 
 
     def _parse_filename_(self, file):
@@ -39,7 +43,7 @@ class IndexParser:
         mtch = mtch.groups()[1].split("_")
 
         # Version
-        vers = re.match(".*_([0-9]+)\.grb\.index$", path.basename(file))
+        vers = re.match(".*_([0-9]+)\.grb\.index.*$", path.basename(file))
         vers = int(vers.group(1)) if vers else None
 
         if len(mtch) == 4:
@@ -85,7 +89,7 @@ class IndexParser:
         if not nrows is None and not isinstance(nrows, int):
             raise TypeError("Wrong input on 'nrows'.")
         if isinstance(nrows, int):
-            if not int > 0:
+            if not nrows > 0:
                 raise ValueError("If 'nrows' is set it musbe positive (not {nrows}).")
 
         # Extracting some information from the file name first
@@ -140,21 +144,47 @@ class IndexParser:
             del data["step"]
             del data["date"]
             del data["time"]
+            partition_cols = self.PARQUET_PARTITIONING_ANALYSIS
         else:
-            data.date     = pd.to_datetime(data.date, format = "%Y%m%d")
-            data["year"]  = data.date.dt.year
-            data["month"] = data.date.dt.month
-            data["day"]   = data.date.dt.day
+            # Manipulate parameter name if we have levelist.
+            if "levelist" in data.columns:
+                data.param = data.param + data.levelist
+                del data["levelist"]
+
+            # In case we have an ensemble but no number we got
+            # forecast control run. Set number to 0.
+            if not "number" in data.columns:
+                data["number"] = 0
+
+            # Adding file/dataset version
+            data["version"] = file_info["version"]
+
+            # Adding product. Either ens (ctr gets ens in _parse_filename_)
+            # or efi.
+            data["product"] = file_info["product"]
+
+            # Manipulate date/time information (model run initialization)
+            data.date       = pd.to_datetime(data.date, format = "%Y%m%d")
+            data["year"]    = data.date.dt.year
+            data["month"]   = data.date.dt.month
+            data["day"]     = data.date.dt.day
             del data["date"]
+            partition_cols = self.PARQUET_PARTITIONING_FORECAST
+
+        # Dropping a series of columns
+        if True:
+            for colname in ["domain", "levtype", "class", "type", "stream", "expver",
+                            "_leg_number", "_param_id"]:
+                if colname in data.columns: del data[colname]
 
         zip.close()                # Close the file after opening it
         del zip
 
         # Write parquet file
         n_data = data.shape[0]
-        if verbose: print(f"Writing {n_data} entries into parquet {file_info['type']}.")
+        if verbose: print(f"    Writing {n_data} entries into parquet '{file_info['type']}'.")
         try:
-            data.to_parquet(file_info["type"], partition_cols = self.PARQUET_PARTITIONING_ANALYSIS)
+            data.to_parquet(file_info["type"], partition_cols = partition_cols)
         except Exception as e:
             raise Exception(f"Whoops, problem writing parquet data; {e}")
 

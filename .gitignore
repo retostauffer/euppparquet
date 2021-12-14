@@ -1,0 +1,15 @@
+
+
+
+/analysis
+/forecast
+/reforecast
+
+
+venv
+pydata
+_data
+__pycache__
+*.swp
+*.zip
+/_test*
