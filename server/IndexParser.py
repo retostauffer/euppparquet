@@ -12,11 +12,11 @@ import datetime as dt
 class IndexParser:
 
     PARQUET_PARTITIONING_ANALYSIS = ["year", "month", "day"]
-    #PARQUET_PARTITIONING_FORECAST = ["version", "year", "month", "day"]
     PARQUET_PARTITIONING_FORECAST = ["version", "product", "year", "month", "day"]
+    # Used for testing ...
+    #PARQUET_PARTITIONING_FORECAST = ["version", "year", "month", "day"]
     #PARQUET_PARTITIONING_FORECAST = ["year", "month", "day", "step"]
     #PARQUET_PARTITIONING_FORECAST = ["year", "month", "day", "param"]
-
 
     def _parse_filename_(self, file):
         """_parse_filename_(file)
