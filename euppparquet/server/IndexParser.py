@@ -140,11 +140,14 @@ class IndexParser:
             data["year"]  = data.date.dt.year
             data["month"] = data.date.dt.month
             data["day"]   = data.date.dt.day
-            data["hour"]  = data.date.dt.hour
+
+            data.rename(columns = {"hour": "time"})
+
             del data["step"]
             del data["date"]
             del data["time"]
             partition_cols = self.PARQUET_PARTITIONING_ANALYSIS
+
         else:
             # Manipulate parameter name if we have levelist.
             if "levelist" in data.columns:
@@ -168,6 +171,7 @@ class IndexParser:
             data["year"]    = data.date.dt.year
             data["month"]   = data.date.dt.month
             data["day"]     = data.date.dt.day
+
             del data["date"]
             partition_cols = self.PARQUET_PARTITIONING_FORECAST
 
@@ -192,7 +196,7 @@ class IndexParser:
             except Exception as e:
                 raise Exception(f"Whoops, problem writing parquet data; {e}")
         else:
-            if verbose: print(f"    File already processed; don't add it to the parquet file again.")
+            if verbose: print(f"     ¯\_(ツ)_/¯ File already processed; don't add it to the parquet file again.")
 
         # Return the object for testing
         return data
