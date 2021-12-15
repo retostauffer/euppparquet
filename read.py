@@ -35,14 +35,21 @@ if __name__ == "__main__":
                ("month", "=", 1),
                ("step",  "=", 96),
                ("param", "=", "t700")]
+
+    # Ors would be multiple lists [[(filter set 1)], [(filter set 2)]]
     filters = [("year", ">=", 2017), ("month", ">=", 6), ("day", ">=", 1),
                ("year", "<=", 2017), ("month", "<=", 6), ("day", "<=", 30),
                ("param", "=", "2t")]
+    filters = [("year", ">=", 2017), ("month", ">=", 6), ("day", ">=", 1),
+               ("year", "<=", 2017), ("month", "<=", 6), ("day", "<=", 30)]
 
 
     #p = pd.read_parquet("forecast", engine = "pyarrow", filters = filters)
     p = pd.read_parquet("analysis.parquet", engine = "pyarrow", filters = filters)
-    for n in ["year", "month", "day", "hour", "step"]:
+
+    # year, month, and day are used for partitioning the parquet data set and
+    # will thus be returned as 'category'; convert back to integer.
+    for n in ["year", "month", "day"]:
         if n in p.columns: p[n] = p[n].astype("int")
 
     for n in p.columns:
@@ -56,6 +63,7 @@ if __name__ == "__main__":
     print(p.tail())
     #print(p.iloc[1, ])
     print(p.param.unique())
+    print(p.hour.unique())
     print(p.shape)
 
 

@@ -78,19 +78,50 @@ if __name__ == "__main__":
     elif not args.product in products:
         argparse.ArgumentTypeError(f"-p/--product must be one of {products:}.")
 
-    print(args)
+    #print(args)
 
 
+    # ----------------------------------------------------------
     # Setting up filters for the different requests
-    if args.product == "analysis":
-        filters = [("year",  "=", args.begin.year),
-                   ("month", "=", args.begin.month),
-                   ("month", "=", args.begin.day),
-                   ("step",  "=", args.step),
-                   ("param", "=", args.param)]
-        #filters = [("param", "=", "t700")]
+    # ----------------------------------------------------------
+    filters = []
+    # Only one begin date?
+    if not args.end:
+        filters.append(("year",  "=", args.begin.year))
+        filters.append(("month", "=", args.begin.month))
+        filters.append(("day",   "=", args.begin.day))
+    else:
+        if args.begin.year == args.end.year:
+            filters.append(("year",  "=", args.begin.year))
+        else:
+            filters.append(("year", ">=", args.begin.year))
+            filters.append(("year", "<=", args.end.year))
+        if args.begin.month == args.end.month:
+            filters.append(("month",  "=", args.begin.month))
+        else:
+            filters.append(("month", ">=", args.begin.month))
+            filters.append(("month", "<=", args.end.month))
+        filters.append(("day", ">=", args.begin.day))
+        filters.append(("day", "<=", args.end.day))
 
-    p = pd.read_parquet(f"{args.product}.parquet", engine = "pyarrow")
-    print(p)
-    print(p.iloc[1, ])
-    print(p.param)
+    # Adding parameters
+    if args.variable: filters.append(("param", "=", args.variable))
+
+    # Analysis
+    if   args.product == "analysis" and args.time:   filters.append(("time",     "=", args.time))
+    elif args.product != "analysis" and args.steps:  filters.append(("step",     "=", args.step))
+
+    print(filters)
+
+    # Retrieving data
+    res = pd.read_parquet(f"{args.product}.parquet", engine = "pyarrow", filters = filters)
+
+    print(res.head())
+    print(res.shape)
+
+
+
+
+
+
+
