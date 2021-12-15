@@ -1,4 +1,5 @@
 
+argparse
 requests
 ipython
 pyarrow
