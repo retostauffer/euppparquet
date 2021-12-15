@@ -1,0 +1,96 @@
+#!/usr/bin/env python3
+
+import os
+import pyarrow.parquet as parquet
+import numpy as np
+import pandas as pd
+
+# --------------------------------------------------------------
+# Binary to create the parquet files.
+# --------------------------------------------------------------
+if __name__ == "__main__":
+
+    import os
+    import re
+    import sys
+    import argparse
+    from datetime import datetime as dt
+
+    # ----------------------------------------------------------
+    # Helper functions for input value checking
+    # ----------------------------------------------------------
+    def valid_date(x):
+        try:
+            return dt.strptime(x, "%Y-%m-%d")
+        except ValueError:
+            msg = "not a valid date: {0!r}".format(x)
+            raise argparse.ArgumentTypeError(msg)
+
+    def positive_int(x):
+        if not re.match("^[0-9]+$", x):
+            msg = "not an integer: {0!r}".format(x)
+            raise argparse.ArgumentTypeError(msg)
+        elif not int(x) >= 0:
+            msg = "must be positive integer: {0!r}".format(x)
+            raise argparse.ArgumentTypeError(msg)
+        return int(x)
+
+    def valid_hour(x):
+        if not re.match("^[0-9]+$", x):
+            msg = "not an integer: {0!r}".format(x)
+            raise argparse.ArgumentTypeError(msg)
+        elif 0 <= int(x) <= 24:
+            msg = "must be an integer in range [0, 24]: {0!r}".format(x)
+            raise argparse.ArgumentTypeError(msg)
+        return int(x)
+
+    # ----------------------------------------------------------
+    # Argument parser
+    # ----------------------------------------------------------
+    parser = argparse.ArgumentParser(description = """
+    Executable (python) shipped with the euppparquet package. Allows
+    to retrieve information about the location of specific grib messages
+    interfacing a series of parquet files.
+
+    Examples:
+        eupp_get_parquet -b 2017-01-01 -p forecast -s 3 -v 2t
+    """)
+
+    parser.add_argument("-b", "--begin", type = valid_date,
+            help = "Beginning date (start date), required. Must be in ISO representation (e.g., '2017-01-01').")
+    parser.add_argument("-e", "--end", type = valid_date,
+            help = "End date, optional. If not specified -b/--begin defines start and end (one day).")
+    parser.add_argument("-p", "--product", type = str,
+            help = "Product to be processed. 'analysis', 'forecast', or 'reforecast'.")
+    parser.add_argument("-v", "--variable", type = str, default = "all",
+            help = "Name of the variable to be retrieved. Defaults to 'all' (all available).")
+    parser.add_argument("-s", "--step", type = positive_int,
+            help = "Forecast step (in hours). Only useful with -p/--product in 'forecast'/'reforecast'.")
+    parser.add_argument("-t", "--time", type = valid_hour,
+            help = "Time of day (UTC; 0 - 24), only useful with -p/--product = 'analysis'.")
+
+    args = parser.parse_args()
+
+    if not args.begin: parser.error("-b/--begin must be specified")
+    products = ["analysis", "forecast", "reforecast"]
+    if not args.product:
+        parser.error(f"-p/--product must be set (one of {products:}).")
+    elif not args.product in products:
+        argparse.ArgumentTypeError(f"-p/--product must be one of {products:}.")
+
+    print(args)
+
+
+    # Setting up filters for the different requests
+    if args.product == "analysis":
+        filters = [("year",  "=", args.begin.year),
+                   ("month", "=", args.begin.month),
+                   ("month", "=", args.begin.day),
+                   ("step",  "=", args.step),
+                   ("param", "=", args.param)]
+        #filters = [("param", "=", "t700")]
+
+    p = pd.read_parquet(f"{args.product}.parquet", engine = "pyarrow")
+    print(p)
+    print(p.iloc[1, ])
+    print(p.param)

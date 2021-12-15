@@ -16,7 +16,7 @@ isreleased = %s
 """
     from os import path
     if not filename:
-        filename = path.join(path.dirname(__file__), "euppparquet", "version.py")
+        filename = path.join(path.dirname(__file__), "version.py")
 
     a = open(filename, "w")
     try:
@@ -45,9 +45,12 @@ setup(name        = "euppparquet",     # This is the package name
       maintainer_email = "reto.stauffer@uibk.ac.at",
       author           = "Reto Stauffer [aut,cre]",
       license          = "GPL-2",
-      install_requires = ["numpy"],
-
+      install_requires = ["requests", "pandas", "pyarrow"],
       packages         = ["euppparquet"],
+
+      scripts = ["bin/eupp_make_parquet",
+                 "bin/eupp_get_parquet"],
+
       include_package_data = False,
       czip_save        = False)
 

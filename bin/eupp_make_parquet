@@ -1,0 +1,89 @@
+#!/usr/bin/env python3
+#!/usr/bin/env python3
+
+# --------------------------------------------------------------
+# Binary to create the parquet files.
+# --------------------------------------------------------------
+if __name__ == "__main__":
+
+    import os
+    import sys
+    import argparse
+    from euppparquet import server
+
+    # ----------------------------------------------------------
+    # Argument parser
+    # ----------------------------------------------------------
+    parser = argparse.ArgumentParser(description = """
+    Executable (python) shipped with the euppparquet package. This
+    script is intended to be used by the data set administrator only.
+
+    Parses GRIB index files to create the parquet data sets for accessing
+    GRIB message meta information which is later used to efficiently access
+    specific grib messages over several files requested by the user.
+
+    Examples:
+        # Analysis, only January 2017
+        eupp_make_parquet -p analysis -y 2017 -m 1
+        # Analysis, 2017 January to June
+        eupp_make_parquet -p analysis -y 2017 -m 1 2 3 4 5 6
+
+        # Forecast, only January 2017
+        eupp_make_parquet -p forecast -y 2017 -m 1
+
+        # Reforecast, only January 2017
+        eupp_make_parquet -p reforecast -y 2017 -m 1
+
+        # All products (analysis, forecast, reforecast) full 2017
+        eupp_make_parquet -y 2017
+    """)
+
+    parser.add_argument("-y", "--years", type = int, nargs = "+",
+            help = "Year or years to be processed. Multiple can be provided (-y 2017 2018).")
+    parser.add_argument("-m", "--months", type = int, nargs = "+",
+            help = "Month or months to be processed. Multiple can be provided (-m 1 2 3). Defaults to 1-12 (all months).")
+    parser.add_argument("-p", "--product", type = str, default = "all",
+            help = "Product to be processed. 'analysis', 'forecast', 'reforecast', or 'all'.")
+    parser.add_argument("-d", "--datadir", type = str, default = "_data",
+            help = "Path to directory where to store the data (caching GRIB index files).")
+    parser.add_argument("--baseurl", type = str, default = "https://storage.ecmwf.europeanweather.cloud/benchmark-dataset",
+            help = "Base URL; typically not specified by the user.")
+    parser.add_argument("--nrows", type = int, default = None,
+            help = "For development purposes only!")
+
+    args = parser.parse_args()
+
+    if not args.months: args.months = range(1, 13)
+    if not args.years:  parser.error("Year/years must be provided.")
+
+    # ----------------------------------------------------------
+    # Sanity checks
+    # ----------------------------------------------------------
+    # Checking years/months
+    from euppparquet.server.prepare_parquet import _check_years_months_
+    args.years, args.months = _check_years_months_(args.years, args.months)
+    product = ["all", "analysis", "forecast", "reforecast"]
+    if not args.product in product:
+        raise ValueError(f"Wrong argument for product. Allowed are {product:}")
+    if args.product == "all":
+        args.product = product[1:]
+    else:
+        args.product = [args.product]
+    if not os.path.isdir(args.datadir):
+        raise Exception(f"Directory {args.datadir} (-d/--datadir) does not exist.")
+
+
+    # ----------------------------------------------------------
+    # Processing the data
+    # ----------------------------------------------------------
+    for product in args.product:
+        try:
+            fun = getattr(server, f"prepare_{product}")
+        except Exception as e:
+            raise Exception(e)
+        fun(args.baseurl, args.datadir, args.years, args.months, nrows = args.nrows)
+
+
+
+
+
