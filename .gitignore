@@ -1,6 +1,9 @@
 
-venv
-pydata
+/venv
+/pydata
 __pycache__
 *.swp
+
+/_data
 /euppparquet.egg-info
+/*.parquet
