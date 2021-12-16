@@ -133,6 +133,11 @@ class IndexParser:
             return int(mtch.group(2))
         data.step = data.step.apply(extract_step)
 
+        # Manipulate parameter name if we have levelist.
+        if "levelist" in data.columns:
+            data.param = data.param + data.levelist
+            del data["levelist"]
+
         # Appending date and time information for parquet partitions
         if file_info["type"] == "analysis":
             data.date     = pd.to_datetime(data.date + " " + data.time, format = "%Y%m%d %H%M")
@@ -149,10 +154,6 @@ class IndexParser:
             partition_cols = self.PARQUET_PARTITIONING_ANALYSIS
 
         else:
-            # Manipulate parameter name if we have levelist.
-            if "levelist" in data.columns:
-                data.param = data.param + data.levelist
-                del data["levelist"]
 
             # In case we have an ensemble but no number we got
             # forecast control run. Set number to 0.

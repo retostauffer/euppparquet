@@ -4,3 +4,5 @@ requests
 ipython
 pyarrow
 pandas
+fsspec
+s3fs
