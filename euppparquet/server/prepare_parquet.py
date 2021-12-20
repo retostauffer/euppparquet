@@ -96,14 +96,14 @@ def prepare_analysis(baseurl, dir, years, months, nrows = None):
     years, months = _check_years_months_(years, months)
 
     # Processing 'analysis'
-    urls = []
     #for year in range(1997, 1998):
     for year in years:
+        urls = []
         for month in months:
             urls.append(f"{baseurl}/data/ana/pressure/EU_analysis_pressure_params_{year:04d}-{month:02d}.grb.index")
             urls.append(f"{baseurl}/data/ana/surf/EU_analysis_surf_params_{year:04d}-{month:02d}.grb.index")
 
-    process_files(urls, dir, nrows = nrows, verbose = True)
+        process_files(urls, dir, nrows = nrows, verbose = True)
 
 
 # --------------------------------------------------------------
@@ -134,8 +134,8 @@ def prepare_forecast(baseurl, dir, years, months, version = 0, nrows = None):
 
     import datetime as dt
 
-    urls = []
     for year in years:
+        urls = []
         for month in months:
             ## Control run
             urls.append(f"{baseurl}/data/fcs/pressure/EU_forecast_ctr_pressure_params_{year:04d}-{month:02d}_{version}.grb.index")
@@ -189,8 +189,8 @@ def prepare_reforecast(baseurl, dir, years, months, version = 0, nrows = None):
 
     import datetime as dt
 
-    urls = []
     for year in years:
+        urls = []
         for month in months:
             ## Control run
             urls.append(f"{baseurl}/data/rfcs/surf/EU_reforecast_ctr_surf_params_{year:04d}-{month:02d}_{version}.grb.index")
