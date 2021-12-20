@@ -198,7 +198,7 @@ def prepare_reforecast(baseurl, dir, years, months, version = 0, nrows = None):
 
             # Ensemble members
             curr = dt.date(year, month, 1)
-            end  = (dt.date(year, month + 1, 1) if month <= 12 else dt.date(year + 1, 1, 1)) - dt.timedelta(1)
+            end  = (dt.date(year, month + 1, 1) if month < 12 else dt.date(year + 1, 1, 1)) - dt.timedelta(1)
             while curr <= end:
                 # Skip if not Monday (0) or Thursday (3)
                 if not  curr.timetuple().tm_wday in [0, 3]:
