@@ -21,7 +21,10 @@ from . import api
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    re_path(r"^/?$", views.home),
+    path("", views.home, name = "home sweet home"),
     re_path(r"^test/?$", views.test),
-    re_path(r"^api/test/?$", api.show_parquet_data),
+    ## turn that into view/...../???? re_path(r"^api/test/?$", api.show_parquet_data),
+    re_path(r"^api/analysis/(?P<daterange>[0-9]{4}-[0-9]{2}-[0-9]{2}(/[0-9]{4}-[0-9]{2}-[0-9]{2})?)/?$", api.get_messages_analysis, name = "API Analysis"),
+    re_path(r"^api/forecast/(?P<product>\w+)/(?P<daterange>[0-9]{4}-[0-9]{2}-[0-9]{2}(/[0-9]{4}-[0-9]{2}-[0-9]{2})?)/?$", api.get_messages_forecast, name = "API Forecast"),
+    re_path(r"^api/reforecast/(?P<product>\w+)/(?P<daterange>[0-9]{4}-[0-9]{2}-[0-9]{2}(/[0-9]{4}-[0-9]{2}-[0-9]{2})?)/?$", api.get_messages_forecast, name = "API Reforecast"),
 ]
