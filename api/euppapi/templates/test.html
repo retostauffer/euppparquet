@@ -16,47 +16,29 @@ div.home-icon img {
 {% endblock %}
 
 {% block js %}
-<script src="{% static "node_modules/jquery-bootgrid/dist/jquery.bootgrid.min.js" %}"></script>
+<script src="{% static "node_modules/datatables.net/js/jquery.dataTables.min.js" %}"></script>
 <script>
 $(document).ready(function() {
-  $("#grid").bootgrid({
-      navigation: 3,
-      padding: 2,
-      rowCount: [20, 50, 100, -1],
-      columnSelection: true,
-      ajax: true,
-      ajaxSettings: {
-          method: "GET"
-      },
-      post: {"csrfmiddlewaretoken": "{{ csrf_token }}"},
-      url: "/api/test/",
-      searchSettings: {
-          delay: 100,
-          characters: 3
-      },
-      formatters: {
-          "link": function(column, row) {
-              return "<a href=\"/station/" + row.station+ "\">" + row.name + "</a>";
-          }
-      },
-
-  });
-  // Enable dropdown menus
-  $(".dropdown-toggle").dropdown();
-  $("#grid").on("loaded.rs.jquery.bootgrid", function() {
-      // Create map and api URL
-      var mapurl = "/map"
-      var apiurl_xml  = "{% if request.is_secure %}https{% else %}http{% endif %}://{{ request.get_host }}/api/station-search?format=xml"
-      var search = $("#grid-header .search-field").val()
-      if (search.length > 0) {
-          apiurl_xml  = apiurl_xml  + "&searchPhrase=" + search
-          mapurl = mapurl + "?searchPhrase=" + search
-      }
-      $("#apiurl-xml").text(apiurl_xml)
-      $("#mapurl").text("{% trans "Show stations on map" %}").attr("href", mapurl)
-
-  });
-
+    var columns = []
+    $("#grid").DataTable({
+        ajax: {
+            url: "/api/test",
+            data: {"csrfmiddlewaretoken": "{{ csrf_token }}"},
+            dataSrc: "data",
+        },
+        columns: [
+            {data: "_path"},
+            {data: "param"},
+            {data: "year"},
+            {data: "month"},
+            {data: "day"},
+            {data: "_offset"},
+            {data: "_length"},
+        ],
+        initComplete: function(settings, json) {
+            console.log(json.data[0]);
+        }
+    });
 });
 </script>
 {% endblock %}
@@ -65,12 +47,16 @@ $(document).ready(function() {
 
 <h1>EUPP Parquet API</h1>
 
-<table id="grid" class="table table-condensed table-hover table-striped" data-toggle="bootgrid" data-ajax="true" data-url="/api/data/basic">
+<table id="grid">
     <thead>
         <tr>
-            {% for x in columns %}
-            <th data-column-id="{{ x }}" data-type="numeric" data-identifier="true">{{ x }}</th>
-            {% endfor %}
+            <th>Grib file path</th>
+            <th>Param</th>
+            <th>Year</th>
+            <th>Month</th>
+            <th>Day</th>
+            <th>Offset</th>
+            <th>Length</th>
         </tr>
     </thead>
 </table>

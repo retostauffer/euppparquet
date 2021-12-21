@@ -70,20 +70,9 @@ def show_parquet_data(request):
 
     data = get_parquet_data("analysis", 2017, 1, [1, 2], "stl1")
 
-    try:
-        current = 1 if not request.GET.get("current") else int(request.GET.get("current"))
-    except:
-        current = 1
-    try:
-        rowCount = 20 if not request.GET.get("rowCount") else int(request.GET.get("rowCount"))
-    except:
-        rowCount = 20
-
     # Generate dictionary.
-    res = dict(current  = current,
-               rowCount = rowCount,
-               rows     = data.to_dict(orient = "records"),
-               total    = data.shape[0],
+    res = dict(total    = data.shape[0],
+               data     = data.to_dict(orient = "records"),
                columns  = [x for x in data.columns])
 
     return HttpResponse(json.dumps(res), content_type = "application/json") if request else res
