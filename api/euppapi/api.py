@@ -66,14 +66,19 @@ def show_parquet_data(request):
     """
 
     import json
+    import pandas as pd
     from .api import get_parquet_data
 
-    data = get_parquet_data("analysis", 2017, 1, [1, 2], "stl1")
+    #data = get_parquet_data("analysis", 2017, 1, [1, 2], "stl1")
+    data = get_parquet_data("analysis", 2017, range(13), range(32), "stl1")
 
     # Generate dictionary.
-    res = dict(total    = data.shape[0],
-               data     = data.to_dict(orient = "records"),
-               columns  = [x for x in data.columns])
+    if isinstance(data, pd.DataFrame):
+        res = dict(total    = data.shape[0],
+                   data     = data.to_dict(orient = "records"),
+                   columns  = [x for x in data.columns])
+    else:
+        res = data
 
     return HttpResponse(json.dumps(res), content_type = "application/json") if request else res
 

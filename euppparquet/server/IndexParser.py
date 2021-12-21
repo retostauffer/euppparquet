@@ -160,7 +160,6 @@ class IndexParser:
 
             del data["step"]
             del data["date"]
-            del data["time"]
             partition_cols = self.PARQUET_PARTITIONING_ANALYSIS
 
         else:
