@@ -1,3 +1,27 @@
 /* Customization */
+.dataTable {
+  width: 100%;
+}
+
+.dataTable tr td {
+  padding: 0.2em;
+}
+
+.dataTable tr.odd td {
+  background-color: #edf4f8;
+}
+
+.paging_simple_numbers a, .paging_simple_numbers .ellipsis {
+  display: block;
+  float: left;
+  padding: 0.5em 1em;
+  margin: 0 0.5em;
+  cursor: pointer;
+  border: 1px solid blue;
+}
+
+.paging_simple_numbers a:first-child, .paging_simple_numbers .ellipsis:first-child {
+  margin-left: 0;
+}
 
 /*# sourceMappingURL=euppapi_bootstrap.css.map */

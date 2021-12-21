@@ -19,24 +19,34 @@ div.home-icon img {
 <script src="{% static "node_modules/datatables.net/js/jquery.dataTables.min.js" %}"></script>
 <script>
 $(document).ready(function() {
-    var columns = []
-    $("#grid").DataTable({
-        ajax: {
-            url: "/api/test",
-            data: {"csrfmiddlewaretoken": "{{ csrf_token }}"},
-            dataSrc: "data",
-        },
-        columns: [
-            {data: "_path"},
-            {data: "param"},
-            {data: "year"},
-            {data: "month"},
-            {data: "day"},
-            {data: "_offset"},
-            {data: "_length"},
-        ],
-        initComplete: function(settings, json) {
-            console.log(json)
+    $.ajax({
+        url: "/api/test",
+        data: {"csrfmiddlewaretoken": "{{ csrf_token }}", "orient": "records"},
+        success: function(data) {
+            if (data.warning) {
+                alert(data.warning);
+            } else {
+                $("#grid").DataTable({
+                    data: data.data,
+                    columns: [
+                        {
+                            data: "_path",
+                            render: function(val, type, full, meta) {
+                                return "<a href='" + data.DATA_BASE_URL + "/" + val + "'>" +
+                                    val.split("/").reverse()[0] + "</a>";
+                            }
+                        },
+                        {data: "param"},
+                        {data: "year",    className: "text-center" },
+                        {data: "month",   className: "text-center" },
+                        {data: "day",     className: "text-center" },
+                        {data: "time",    className: "text-center" },
+                        {data: "_offset", className: "text-right"  },
+                        {data: "_length", className: "text-right"  },
+                    ],
+
+                });
+            }
         }
     });
 });
@@ -47,6 +57,8 @@ $(document).ready(function() {
 
 <h1>EUPP Parquet API</h1>
 
+{{ settings.DATA_BASE_URL }}
+
 <table id="grid">
     <thead>
         <tr>
@@ -55,6 +67,7 @@ $(document).ready(function() {
             <th>Year</th>
             <th>Month</th>
             <th>Day</th>
+            <th>Time</th>
             <th>Offset</th>
             <th>Length</th>
         </tr>

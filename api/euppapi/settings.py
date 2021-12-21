@@ -19,6 +19,9 @@ APP_NAME = "euppapi"
 APP_TITLE = "EUPP Parquet API"
 SITE_ROOT = os.path.join(BASE_DIR, APP_NAME)
 
+# Data base URL
+DATA_BASE_URL = "https://storage.ecmwf.europeanweather.cloud/benchmark-dataset"
+
 # Logging; INFO for development
 import logging
 logger = logging.getLogger(APP_NAME)

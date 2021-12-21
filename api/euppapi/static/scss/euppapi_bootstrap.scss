@@ -2,3 +2,32 @@
 
 /* Customization */
 
+$color-lightbg: #edf4f8;
+
+.dataTable {
+    width: 100%;
+
+    tr {
+        td {
+            padding: 0.2em;
+        }
+
+        &.odd td {
+            background-color: $color-lightbg;
+        }
+    }
+}
+
+
+.paging_simple_numbers a, .paging_simple_numbers .ellipsis {
+    display: block;
+    float: left;
+    padding: 0.5em 1em;
+    margin: 0 0.5em;
+    cursor: pointer;
+    border: 1px solid blue;
+
+    &:first-child {
+        margin-left: 0;
+    }
+}

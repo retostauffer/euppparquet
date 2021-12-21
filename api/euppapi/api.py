@@ -8,7 +8,7 @@ from django.shortcuts import HttpResponse
 import logging
 logger = logging.getLogger("euppparquet.api")
 
-def get_parquet_data(type, year, month, day, param, limit = 1000):
+def get_parquet_data(type, year, month, day, param, limit = 3000):
     """
 
 
@@ -51,7 +51,7 @@ def get_parquet_data(type, year, month, day, param, limit = 1000):
 
     nmsg = scan.count_rows()
     if nmsg > limit:
-        result = dict(warning = "Request results in too many messages ({nmsg}).", nmsg = nmsg)
+        result = dict(warning = f"Request results in too many messages ({nmsg}).", nmsg = nmsg)
     else:
         result = scan.to_reader().read_pandas()
 
@@ -70,13 +70,15 @@ def show_parquet_data(request):
     from .api import get_parquet_data
 
     #data = get_parquet_data("analysis", 2017, 1, [1, 2], "stl1")
-    data = get_parquet_data("analysis", 2017, range(13), range(32), "stl1")
+    #data = get_parquet_data("analysis", 2017, range(13), range(32), "stl1")
+    data = get_parquet_data("analysis", 2017, 1, range(32), "stl1")
 
     # Generate dictionary.
     if isinstance(data, pd.DataFrame):
         res = dict(total    = data.shape[0],
                    data     = data.to_dict(orient = "records"),
-                   columns  = [x for x in data.columns])
+                   columns  = [x for x in data.columns],
+                   DATA_BASE_URL = settings.DATA_BASE_URL)
     else:
         res = data
 

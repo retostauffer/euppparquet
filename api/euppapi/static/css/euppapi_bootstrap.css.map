@@ -5,8 +5,8 @@
 		"../scss/euppapi_bootstrap.scss"
 	],
 	"sourcesContent": [
-		"\n\n/* Customization */\n\n"
+		"\n\n/* Customization */\n\n$color-lightbg: #edf4f8;\n\n.dataTable {\n    width: 100%;\n\n    tr {\n        td {\n            padding: 0.2em;\n        }\n\n        &.odd td {\n            background-color: $color-lightbg;\n        }\n    }\n}\n\n\n.paging_simple_numbers a, .paging_simple_numbers .ellipsis {\n    display: block;\n    float: left;\n    padding: 0.5em 1em;\n    margin: 0 0.5em;\n    cursor: pointer;\n    border: 1px solid blue;\n\n    &:first-child {\n        margin-left: 0;\n    }\n}\n"
 	],
 	"names": [],
-	"mappings": "AAEA,mBAAmB"
+	"mappings": "AAEA,mBAAmB;AAInB,AAAA,UAAU,CAAC;EACP,KAAK,EAAE,IAAI;CAWd;;AAZD,AAIQ,UAJE,CAGN,EAAE,CACE,EAAE,CAAC;EACC,OAAO,EAAE,KAAK;CACjB;;AANT,AAQQ,UARE,CAGN,EAAE,AAKG,IAAI,CAAC,EAAE,CAAC;EACL,gBAAgB,EAXZ,OAAO;CAYd;;AAKT,AAAA,sBAAsB,CAAC,CAAC,EAAE,sBAAsB,CAAC,SAAS,CAAC;EACvD,OAAO,EAAE,KAAK;EACd,KAAK,EAAE,IAAI;EACX,OAAO,EAAE,SAAS;EAClB,MAAM,EAAE,OAAO;EACf,MAAM,EAAE,OAAO;EACf,MAAM,EAAE,cAAc;CAKzB;;AAXD,AAQI,sBARkB,CAAC,CAAC,AAQnB,YAAY,EARS,sBAAsB,CAAC,SAAS,AAQrD,YAAY,CAAC;EACV,WAAW,EAAE,CAAC;CACjB"
 }
