@@ -35,9 +35,18 @@ ALLOWED_HOSTS = ["0.0.0.0",
                  "127.0.0.1",
                  "eeecon.uibk.ac.at"]
 
+# Dockerfile sets an environment variable 'EUPPAPI_IN_DOCKER'
+# used to specify the path to the parquet files. When the django
+# app is run locally I use ../parquet, which is mounted on /parquet
+# when running in docker (mounted as volume).
+# The environment variable allows to dynamically define this path.
+DOCKER = os.environ.get("EUPPAPI_IN_DOCKER", False)
+if DOCKER:
+    PARQUET_DIR = "/parquet"
+else:
+    PARQUET_DIR = "../parquet"
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -91,7 +100,6 @@ DATABASES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -110,24 +118,18 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
-
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(SITE_ROOT, "static"),]
 STATIC_ROOT = ""
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

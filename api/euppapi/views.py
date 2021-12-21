@@ -26,6 +26,14 @@ def home(request):
 # Main page (index)
 def test(request):
 
+    from os.path import join
+    from glob import glob
+
+
     ###context = {"page_title": "Meteo API"}
     context = {"page_title": None}
+
+    context["files"] = glob(join(settings.PARQUET_DIR, "**", "*"), recursive = True)
+    # Getting PARQUET_DIR from settings
+
     return render(request, "test.html", context)

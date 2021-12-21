@@ -6,9 +6,11 @@ APP_NAME=euppapi
 run:
 	python manage.py runserver
 
-.PHONY: compose
 up:
 	docker-compose up
+
+build:
+	docker-compose up --build
 
 .PHONY: down
 down:

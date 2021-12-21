@@ -5,7 +5,7 @@ services:
     command: bash -c "cd /euppapi && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/euppapi
+    volumes:
+      - ../parquet:/parquet
     ports:
       - "8000:8000"
-    volumes:
-      - ../_data:/data
