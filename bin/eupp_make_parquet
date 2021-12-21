@@ -81,7 +81,8 @@ if __name__ == "__main__":
             fun = getattr(server, f"prepare_{product}")
         except Exception as e:
             raise Exception(e)
-        fun(args.baseurl, args.datadir, args.years, args.months, nrows = args.nrows)
+        fun(args.baseurl, args.datadir, args.years, args.months, parquetdir = "parquet",
+                nrows = args.nrows, verbose = True)
 
 
 

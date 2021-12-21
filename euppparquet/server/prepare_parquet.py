@@ -5,12 +5,12 @@
 # --------------------------------------------------------------
 # Helper function processing files
 # --------------------------------------------------------------
-def process_files(urls, dir, verbose = True, nrows = None):
+def process_files(urls, dir, parquetdir, verbose = True, nrows = None):
 
     from .IndexParser import IndexParser
     from .prepare_zipfile import prepare_zipfile
 
-    parser = IndexParser()
+    parser = IndexParser(parquetdir)
     for url in urls:
         zipfile = prepare_zipfile(url, dir, verbose = verbose)
         parser.process_file(zipfile, verbose = verbose, nrows = nrows)
@@ -55,8 +55,8 @@ def _check_years_months_(years, months):
 # --------------------------------------------------------------
 # Setting up analysis files/urls and process them
 # --------------------------------------------------------------
-def prepare_analysis(baseurl, dir, years, months, nrows = None):
-    """prepare_analysis(baseurl, dir, years, months, nrows = None)
+def prepare_analysis(baseurl, dir, years, months, parquetdir = "parquet", verbose = False, nrows = None):
+    """prepare_analysis(baseurl, dir, years, months, parquetdir = "parquet", verbose = False, nrows = None)
 
     Prepares URLs to the GRIB index files on the server. These
     URLs are then handed over to 'process_files' which itself
@@ -82,6 +82,10 @@ def prepare_analysis(baseurl, dir, years, months, nrows = None):
         Which years should be processed?
     month : int or list of int
         Which months should be processed?
+    parquetdir : str
+        Where to store the .parquet files. Defaults to 'parquet'.
+    verboe : bool
+        Verbosity on or of, defaults to False.
     nrows : None or positive int
         Just for development purposes, defaults to None.
         If None the entire GRIB index is porcessed. If set to
@@ -103,14 +107,14 @@ def prepare_analysis(baseurl, dir, years, months, nrows = None):
             urls.append(f"{baseurl}/data/ana/pressure/EU_analysis_pressure_params_{year:04d}-{month:02d}.grb.index")
             urls.append(f"{baseurl}/data/ana/surf/EU_analysis_surf_params_{year:04d}-{month:02d}.grb.index")
 
-        process_files(urls, dir, nrows = nrows, verbose = True)
+        process_files(urls, dir, parquetdir = parquetdir, nrows = nrows, verbose = verbose)
 
 
 # --------------------------------------------------------------
 # Forecasts
 # --------------------------------------------------------------
-def prepare_forecast(baseurl, dir, years, months, version = 0, nrows = None):
-    """prepare_forecasts(baseurl, dir, years, months, version = 0, nrows = None)
+def prepare_forecast(baseurl, dir, years, months, parquetdir = "parquet", version = 0, verbose = False, nrows = None):
+    """prepare_forecasts(baseurl, dir, years, months, parquetdir = "parquet", version = 0, verbose = False, nrows = None)
 
     Processes all forecasts. This includes control run, ensemble, efi, and hr.
     See 'prepare_analysis' for details.
@@ -121,8 +125,12 @@ def prepare_forecast(baseurl, dir, years, months, version = 0, nrows = None):
     dir : str
     years : int or list of int
     month : int or list of int
+    parquetdir : str
+        Where to store the .parquet files. Defaults to 'parquet'.
     version : int
         Defaults to 0, version of the GRIB index files/GRIB files.
+    verboe : bool
+        Verbosity on or of, defaults to False.
     nrows : None or positive int
 
     Returns
@@ -158,14 +166,14 @@ def prepare_forecast(baseurl, dir, years, months, version = 0, nrows = None):
                 urls.append(f"{baseurl}/data/fcs/surf/EU_forecast_ens_surf_params_{date}_{version}.grb.index")
                 curr += dt.timedelta(1)
 
-        process_files(urls, dir, nrows = nrows, verbose = True)
+        process_files(urls, dir, parquetdir = parquetdir, nrows = nrows, verbose = verbose)
 
 
 # --------------------------------------------------------------
 # Reforecasts
 # --------------------------------------------------------------
-def prepare_reforecast(baseurl, dir, years, months, version = 0, nrows = None):
-    """prepare_forecasts(baseurl, dir, years, months, version = 0, nrows = None)
+def prepare_reforecast(baseurl, dir, years, months, parquetdir = "parquet", version = 0, verbose = False, nrows = None):
+    """prepare_forecasts(baseurl, dir, years, months, parquetdir = "parquet", version = 0, verbose = False, nrows = None)
 
     Processes all reforecasts (or hindcasts). This includes control run and
     ensemble. See 'prepare_analysis' for details.
@@ -176,8 +184,12 @@ def prepare_reforecast(baseurl, dir, years, months, version = 0, nrows = None):
     dir : str
     years : int or list of int
     month : int or list of int
+    parquetdir : str
+        Where to store the .parquet files. Defaults to 'parquet'.
     version : int
         Defaults to 0, version of the GRIB index files/GRIB files.
+    verboe : bool
+        Verbosity on or of, defaults to False.
     nrows : None or positive int
 
     Returns
@@ -210,7 +222,7 @@ def prepare_reforecast(baseurl, dir, years, months, version = 0, nrows = None):
                 urls.append(f"{baseurl}/data/rfcs/pressure/EU_reforecast_ens_pressure_params_{date}_{version}.grb.index")
                 curr += dt.timedelta(1)
 
-        process_files(urls, dir, nrows = nrows, verbose = True)
+        process_files(urls, dir, parquetdir = parquetdir, nrows = nrows, verbose = verbose)
 
 
 

@@ -18,6 +18,16 @@ class IndexParser:
     #PARQUET_PARTITIONING_FORECAST = ["year", "month", "day", "step"]
     #PARQUET_PARTITIONING_FORECAST = ["year", "month", "day", "param"]
 
+    def __init__(self, parquetdir):
+        """IndexParser(parquetdir)
+
+        Parameters
+        ==========
+        parquetdir : str
+            Directory where to store the .parquet files.
+        """
+        self.parquetdir = parquetdir
+
     def _parse_filename_(self, file):
         """_parse_filename_(file)
 
@@ -188,14 +198,16 @@ class IndexParser:
         # Find all unique paths for the parquet check
         paths = [str(x) for x in data._path.unique()]
         check = self._check_records_by_filename_(f"{file_info['type']}.parquet", paths)
+        # File where to store the parquet data
+        pout  = os.path.join(self.parquetdir, f"{file_info['type']}.parquet")
         if not check:
             # Write parquet file
             n_data = data.shape[0]
-            if verbose: print(f"    Writing {n_data} entries into parquet '{file_info['type']}'.")
+            if verbose: print(f"    Writing {n_data} entries into parquet '{pout}'.")
             try:
-                data.to_parquet(f"{file_info['type']}.parquet", partition_cols = partition_cols)
+                data.to_parquet(pout, partition_cols = partition_cols)
             except Exception as e:
-                raise Exception(f"Whoops, problem writing parquet data; {e}")
+                raise Exception(f"Whoops, problem writing parquet data to '{pout}'; {e}")
         else:
             if verbose: print(f"     ¯\_(ツ)_/¯ File already processed; don't add it to the parquet file again.")
 
