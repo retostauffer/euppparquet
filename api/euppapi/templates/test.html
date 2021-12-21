@@ -16,15 +16,64 @@ div.home-icon img {
 {% endblock %}
 
 {% block js %}
+<script src="{% static "node_modules/jquery-bootgrid/dist/jquery.bootgrid.min.js" %}"></script>
+<script>
+$(document).ready(function() {
+  $("#grid").bootgrid({
+      navigation: 3,
+      padding: 2,
+      rowCount: [20, 50, 100, -1],
+      columnSelection: true,
+      ajax: true,
+      ajaxSettings: {
+          method: "GET"
+      },
+      post: {"csrfmiddlewaretoken": "{{ csrf_token }}"},
+      url: "/api/test/",
+      searchSettings: {
+          delay: 100,
+          characters: 3
+      },
+      formatters: {
+          "link": function(column, row) {
+              return "<a href=\"/station/" + row.station+ "\">" + row.name + "</a>";
+          }
+      },
+
+  });
+  // Enable dropdown menus
+  $(".dropdown-toggle").dropdown();
+  $("#grid").on("loaded.rs.jquery.bootgrid", function() {
+      // Create map and api URL
+      var mapurl = "/map"
+      var apiurl_xml  = "{% if request.is_secure %}https{% else %}http{% endif %}://{{ request.get_host }}/api/station-search?format=xml"
+      var search = $("#grid-header .search-field").val()
+      if (search.length > 0) {
+          apiurl_xml  = apiurl_xml  + "&searchPhrase=" + search
+          mapurl = mapurl + "?searchPhrase=" + search
+      }
+      $("#apiurl-xml").text(apiurl_xml)
+      $("#mapurl").text("{% trans "Show stations on map" %}").attr("href", mapurl)
+
+  });
+
+});
+</script>
 {% endblock %}
 
 {% block content %}
 
 <h1>EUPP Parquet API</h1>
 
-{% for file in files %}
-    {{ file }}<br/>
-{% endfor %}
+<table id="grid" class="table table-condensed table-hover table-striped" data-toggle="bootgrid" data-ajax="true" data-url="/api/data/basic">
+    <thead>
+        <tr>
+            {% for x in columns %}
+            <th data-column-id="{{ x }}" data-type="numeric" data-identifier="true">{{ x }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+</table>
 
 {% endblock %}
 

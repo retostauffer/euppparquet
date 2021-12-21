@@ -17,9 +17,11 @@ from django.contrib import admin
 from django.urls import path, re_path
 
 from . import views
+from . import api
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     re_path(r"^/?$", views.home),
     re_path(r"^test/?$", views.test),
+    re_path(r"^api/test/?$", api.show_parquet_data),
 ]

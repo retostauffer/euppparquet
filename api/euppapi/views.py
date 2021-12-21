@@ -26,14 +26,22 @@ def home(request):
 # Main page (index)
 def test(request):
 
-    from os.path import join
+    import os
     from glob import glob
 
 
     ###context = {"page_title": "Meteo API"}
     context = {"page_title": None}
 
-    context["files"] = glob(join(settings.PARQUET_DIR, "**", "*"), recursive = True)
+    context["files"] = glob(os.path.join(settings.PARQUET_DIR, "**", "*"), recursive = True)
     # Getting PARQUET_DIR from settings
+
+    from .api import get_parquet_data
+
+    # Get data as pandas.DataFrame, extract columns and then convert the data to dict
+    context["data"]    = get_parquet_data("analysis", 2017, 1, [1, 2], "stl1")
+    context["columns"] = [x for x in context["data"].columns]
+    #context["columns"] = [dict(title = x) for x in context["data"].columns]
+    context["data"]    = context["data"].to_dict(orient = "records")
 
     return render(request, "test.html", context)
