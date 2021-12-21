@@ -1,0 +1,12 @@
+{
+	"version": 3,
+	"file": "euppapi_bootstrap.css",
+	"sources": [
+		"../scss/euppapi_bootstrap.scss"
+	],
+	"sourcesContent": [
+		"\n\n/* Customization */\n\n"
+	],
+	"names": [],
+	"mappings": "AAEA,mBAAmB"
+}

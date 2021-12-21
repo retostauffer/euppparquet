@@ -1,0 +1,68 @@
+{% extends "layout.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block css %}
+<style>
+div.home-icon {
+    text-align: center !important;
+}
+div.home-icon img {
+    width: 40%;
+    min-width: 100px;
+    padding-bottom: 3em;
+}
+</style>
+{% endblock %}
+
+{% block js %}
+{% endblock %}
+
+{% block content %}
+
+<h1>EUPP Benchmark Dataset API</h1>
+
+<h2>Gridded Analysis Data</h2>
+
+<p>
+Single date; all hours and parameters:<br/>
+<code>http://127.0.0.1:8000/api/analysis/1997-01-01</code>
+</p>
+
+<p>
+Date range, single hour, single parameter:<br/>
+<code>http://127.0.0.1:8000/api/analysis/1997-01-01/1997-01-31?hour=12&amp;param=q700</code>
+</p>
+
+<h2>Gridded Forecast Data</h2>
+
+<p>
+Single date; all steps and parameters:<br/>
+<code>http://127.0.0.1:8000/api/forecast/ens/2017-01-01</code>
+</p>
+
+<p>
+Single date; single step, single parameter:<br/>
+<code>http://127.0.0.1:8000/api/forecast/ens/2017-01-01?step=12&amp;param=2t</code>
+</p>
+
+<p>
+Single date; multiple steps and parameters:<br/>
+<code>http://127.0.0.1:8000/api/forecast/ens/2017-01-01?step=0:6:12:18&amp;param=2t:cp</code>
+</p>
+
+<p>
+Date range, single step (24)<br/>
+<code>http://127.0.0.1:8000/api/forecast/ens/2017-01-01/2017-01-10/24</code>
+</p>
+
+<p>
+Date range, step range (24-90)<br/>
+<code>http://127.0.0.1:8000/api/forecast/ens/2017-01-01/2017-01-10/24/90</code>
+</p>
+{% endblock %}
+
+
+
+
+
