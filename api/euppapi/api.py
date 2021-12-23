@@ -26,8 +26,8 @@ def _get_message_parse_args_(request, daterange, analysis = False):
     note = "EUPP API request issued {:s}".format(dt.now().strftime("%Y-%m-%d %H:%M:%S"))
     res = dict(note = note, error = False)
 
-    # Steps or hour (for analysis)
-    what = "hour" if analysis else "step"
+    # Steps or time (for analysis)
+    what = "time" if analysis else "step"
     req_steps = request.GET.get(what)
     if req_steps is None:
         res[what] = None # None? -> all
@@ -114,12 +114,10 @@ def get_parquet_data(type, daterange, param, limit = 10000, **kwargs):
                      (ds.field("month") <= d1.month) &
                      (ds.field("day")   <= d1.day))
 
-    # subsetting steps/hours?
-    if "step" in kwargs.keys():
+    # subsetting steps/time (hours)?
+    if "step" in kwargs.keys() and not kwargs["step"] is None:
         exp = exp & (ds.field("step").isin(kwargs["step"]))
-    if "hour" in kwargs.keys():
-        exp = exp & (ds.field("hour").isin(kwargs["hour"]))
-    if "number" in kwargs.keys():
+    if "number" in kwargs.keys() and not kwargs["number"] is None:
         exp = exp & (ds.field("number").isin(kwargs["number"]))
 
     # Parameter: if string -> list
@@ -144,6 +142,9 @@ def get_parquet_data(type, daterange, param, limit = 10000, **kwargs):
     else:
         result = scan.to_reader().read_pandas()
 
+    if "time" in kwargs.keys() and not kwargs["time"] is None:
+        result = result[result.time.isin([100 * x for x in kwargs["time"]])]
+
     return result
 
 # -----------------------------------------------------------
@@ -153,8 +154,8 @@ def get_parquet_data(type, daterange, param, limit = 10000, **kwargs):
 def get_messages_analysis(request, daterange):
     """get_messages_analysis()
 
-    GET parameters allowed are '?hour', '?number', and '?param'.  Single values
-    or colon separated lists.  E.g., 'hour=0:6:12' will return analysis for hour
+    GET parameters allowed are '?time', '?number', and '?param'.  Single values
+    or colon separated lists.  E.g., 'time=0:6:12' will return analysis for time (hour)
     '0', '6', and '12' only. 'param=2t:cp' will subset '2t' and 'cp' only.
     'number' works like 'step'. If not set, all steps/parameters will be
     returned.  In case the format is wrong a JSON array is returned containing
@@ -180,12 +181,12 @@ def get_messages_analysis(request, daterange):
 
     # Initializing resulting dictionary
     data = get_parquet_data("analysis", res["daterange"], res["param"],
-                            hour = res["hour"])
+                            time = res["time"])
     if not isinstance(data, pd.DataFrame):
         res.update(data)
     else:
         orient = "list" if request.GET.get("list") else "records"
-        res.update(dict(data = data.to_dict(orient = orient), nmsg = data.shape[0]))
+        res.update(dict(nmsg = data.shape[0], data = data.to_dict(orient = orient)))
 
     # Prepare return
     return HttpResponse(json.dumps(res), content_type = "application/json") if request else res

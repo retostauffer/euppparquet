@@ -103,7 +103,8 @@ class IndexParser:
                 raise ValueError("If 'nrows' is set it musbe positive (not {nrows}).")
 
         # Extracting some information from the file name first
-        file_info = self._parse_filename_(file)
+        file_info    = self._parse_filename_(file)
+        parquet_file = os.path.join(self.parquetdir, f"{file_info['type']}.parquet")
 
         # Open zip file; get file names, and process them one by one (typically
         # there is only one in there!!)
@@ -157,6 +158,7 @@ class IndexParser:
             data["day"]   = data.date.dt.day
 
             data.rename(columns = {"hour": "time"})
+            data.time = data.time.astype("int16")
 
             del data["step"]
             del data["date"]
@@ -196,17 +198,16 @@ class IndexParser:
 
         # Find all unique paths for the parquet check
         paths = [str(x) for x in data._path.unique()]
-        check = self._check_records_by_filename_(f"{file_info['type']}.parquet", paths)
+        check = self._check_records_by_filename_(parquet_file, paths)
         # File where to store the parquet data
-        pout  = os.path.join(self.parquetdir, f"{file_info['type']}.parquet")
         if not check:
             # Write parquet file
             n_data = data.shape[0]
-            if verbose: print(f"    Writing {n_data} entries into parquet '{pout}'.")
+            if verbose: print(f"    Writing {n_data} entries into parquet '{parquet_file}'.")
             try:
-                data.to_parquet(pout, partition_cols = partition_cols)
+                data.to_parquet(parquet_file, partition_cols = partition_cols)
             except Exception as e:
-                raise Exception(f"Whoops, problem writing parquet data to '{pout}'; {e}")
+                raise Exception(f"Whoops, problem writing parquet data to '{parquet_file}'; {e}")
         else:
             if verbose: print(f"     ¯\_(ツ)_/¯ File already processed; don't add it to the parquet file again.")
 
