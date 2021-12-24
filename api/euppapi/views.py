@@ -18,9 +18,14 @@ logger.info("    BASE_DIR:         " + str(settings.BASE_DIR))
 # Main page (index)
 def home(request):
 
-    ###context = {"page_title": "Meteo API"}
     context = {"page_title": None}
     return render(request, "home.html", context)
+
+# Some API Examples
+def examples(request):
+
+    context = {"page_title": None}
+    return render(request, "examples.html", context)
 
 
 # Main page (index)
