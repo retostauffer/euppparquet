@@ -39,16 +39,23 @@ Date range, single hour, single parameter:<br/>
 <code>http://127.0.0.1:8000/api/analysis/2017-01-01/2017-01-31?param=q700&time=12</code>
 </p>
 
+<p>
+Appending <code>list</code> returns the data in 'list style' instead
+of 'record style' which can be very handy when converting the data
+to a <code>pandas.DataFrame</code> or <code>data.frame</code> in R.<br/>
+<code>http://127.0.0.1:8000/api/analysis/2017-01-01?list</code>
+</p>
+
 <h2>Gridded Forecast Data</h2>
 
 <p>
-Single date; all steps and parameters:<br/>
-<code>http://127.0.0.1:8000/api/forecast/ens/2017-01-01</code>
+Single date; one parameter<br/>
+<code>http://127.0.0.1:8000/api/forecast/ens/2017-01-01?param=2t</code>
 </p>
 
 <p>
 Single date; single step, single parameter:<br/>
-<code>http://127.0.0.1:8000/api/forecast/ens/2017-01-01?step=12&amp;param=2t</code>
+<code>http://127.0.0.1:8000/api/forecast/ens/2017-01-01?step=24&amp;param=2t</code>
 </p>
 
 <p>
@@ -57,13 +64,33 @@ Single date; multiple steps and parameters:<br/>
 </p>
 
 <p>
-Date range, single step (24)<br/>
-<code>http://127.0.0.1:8000/api/forecast/ens/2017-01-01/2017-01-10/24</code>
+Date range, single step, single parameter<br/>
+<code>http://127.0.0.1:8000/api/forecast/ens/2017-01-01/2017-01-10?param=2t&amp;step=24</code>
 </p>
 
 <p>
-Date range, step range (24-90)<br/>
-<code>http://127.0.0.1:8000/api/forecast/ens/2017-01-01/2017-01-10/24/90</code>
+Date range, multiple steps, control run (only ensembe member 0)<br/>
+<code>http://127.0.0.1:8000/api/forecast/ens/2017-01-01/2017-01-10?step=24:48:72:96&amp;number=0</code>
+</p>
+
+<p>
+Same as above but loading <code>efi</code> (extreme forecast index) meta
+information and not <code>ens</code> (ensemble forecasts)<br/>
+<code>http://127.0.0.1:8000/api/forecast/efi/2017-01-01/2017-01-10?step=24:48:72:96&amp;number=0</code>
+</p>
+
+<p>
+Same as above but loading <code>hr</code> (high resolution forecast) meta information:<br/>
+<code>http://127.0.0.1:8000/api/forecast/hr/2017-01-01/2017-01-10?step=24:48:72:96&amp;number=0</code>
+</p>
+
+<p>
+Loading <code>reforecast</code> meta information. Note that only one product <code>ens</code>
+is available for reforecasts/hindcasts and these forecasts are only
+available for Mondays and Thursdays. The date/date range defines
+the reforecast initialization date, the API returns all connected
+reforecasts (reforecasts over the previous 20 years).<br/>
+<code>http://127.0.0.1:8000/api/reforecast/ens/2017-01-02?step=24&amp;param=100u:100v</code>
 </p>
 {% endblock %}
 

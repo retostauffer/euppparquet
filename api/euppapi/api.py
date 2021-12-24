@@ -96,7 +96,6 @@ def get_parquet_data(type, daterange, param, limit = 10000, **kwargs):
         return x
 
     # Convert input 'daterange' (list of strings) to datetime.date
-    print(daterange)
     daterange =  [dt.strptime(x, "%Y-%m-%d").date() for x in daterange]
 
     # Building up filter expression
@@ -119,6 +118,8 @@ def get_parquet_data(type, daterange, param, limit = 10000, **kwargs):
         exp = exp & (ds.field("step").isin(kwargs["step"]))
     if "number" in kwargs.keys() and not kwargs["number"] is None:
         exp = exp & (ds.field("number").isin(kwargs["number"]))
+    if "product" in kwargs.keys() and not kwargs["product"] is None:
+        exp = exp & (ds.field("product") == kwargs["product"])
 
     # Parameter: if string -> list
     if isinstance(param, str):
@@ -185,7 +186,7 @@ def get_messages_analysis(request, daterange):
     if not isinstance(data, pd.DataFrame):
         res.update(data)
     else:
-        orient = "list" if request.GET.get("list") else "records"
+        orient = "list" if "list" in request.GET else "records"
         res.update(dict(nmsg = data.shape[0], data = data.to_dict(orient = orient)))
 
     # Prepare return
@@ -223,58 +224,64 @@ def get_messages_forecast(request, product, daterange):
     res = _get_message_parse_args_(request, daterange, analysis = False)
     res.update(dict(type = "forecast"))
 
-    print(res)
-
     # Initializing resulting dictionary
     data = get_parquet_data("forecast", res["daterange"], res["param"],
-                            step = res["step"], number = res["number"])
+                            step = res["step"], number = res["number"],
+                            product = product)
     if not isinstance(data, pd.DataFrame):
         res.update(data)
     else:
-        orient = "list" if request.GET.get("list") else "records"
-        res.update(dict(data = data.to_dict(orient = orient), nmsg = data.shape[0]))
+        orient = "list" if "list" in request.GET else "records"
+        res.update(dict(nmsg = data.shape[0], data = data.to_dict(orient = orient)))
 
     # Prepare return
     return HttpResponse(json.dumps(res), content_type = "application/json") if request else res
 
 
+# -----------------------------------------------------------
+# -----------------------------------------------------------
+# -----------------------------------------------------------
+# -----------------------------------------------------------
+def get_messages_reforecast(request, product, daterange):
+    """test()
 
+    GET parameters allowed are '?step', '?number', and '?param'.  Single values
+    or colon separated lists.  E.g., 'step=0:6:12' will return forecast steps
+    '0', '6', and '12' only. 'param=2t:cp' will subset '2t' and 'cp' only.
+    'number' works like 'step'. If not set, all steps/parameters will be
+    returned.  In case the format is wrong a JSON array is returned containing
+    logical True on 'error'.
 
+    Parameters
+    ==========
+    request : django request
+    product : None (analysis) or str
+        E.g., ens, hr
+    daterange : str
+        Format must be '2017-01-01' or '2017-01-01:2017-01-31'.
 
-#import os
-#from django.conf import settings
-#from django.shortcuts import HttpResponse
-#
-#import logging
-#logger = logging.getLogger("euppparquet.api")
-#
-#
-#
-#
-#def show_parquet_data(request):
-#    """
-#
-#    Returns json for bootgrid
-#    """
-#
-#    import json
-#    import pandas as pd
-#    from .api import get_parquet_data
-#
-#    #data = get_parquet_data("analysis", 2017, 1, [1, 2], "stl1")
-#    #data = get_parquet_data("analysis", 2017, range(13), range(32), "stl1")
-#    data = get_parquet_data("analysis", 2017, 1, range(32), "stl1")
-#
-#    # Generate dictionary.
-#    if isinstance(data, pd.DataFrame):
-#        res = dict(total    = data.shape[0],
-#                   data     = data.to_dict(orient = "records"),
-#                   columns  = [x for x in data.columns],
-#                   DATA_BASE_URL = settings.DATA_BASE_URL)
-#    else:
-#        res = data
-#
-#    return HttpResponse(json.dumps(res), content_type = "application/json") if request else res
+    Return
+    ======
+    JSON string.
+    """
+
+    # Parsing inputs
+    res = _get_message_parse_args_(request, daterange, analysis = False)
+    res.update(dict(type = "forecast"))
+
+    # Initializing resulting dictionary
+    data = get_parquet_data("reforecast", res["daterange"], res["param"],
+                            step = res["step"], number = res["number"],
+                            product = product)
+    if not isinstance(data, pd.DataFrame):
+        res.update(data)
+    else:
+        orient = "list" if "list" in request.GET else "records"
+        res.update(dict(nmsg = data.shape[0], data = data.to_dict(orient = orient)))
+
+    # Prepare return
+    return HttpResponse(json.dumps(res), content_type = "application/json") if request else res
+
 
 
 
